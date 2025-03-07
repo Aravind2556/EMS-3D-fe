@@ -1,0 +1,7 @@
+$primary : #157A6E;
+$enable-gradients: true;
+
+$gradient: linear-gradient(135deg, $primary, #58d3c5);
+
+
+@import '../node_modules/bootstrap/scss//bootstrap.scss'
