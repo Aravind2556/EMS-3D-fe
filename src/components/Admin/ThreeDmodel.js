@@ -74,7 +74,7 @@ export default function Test({ isOn, temperature, vibration, renderModel, curren
     <div>
 
         <span className={`d-flex justify-content-center align-items-center px-2 mx-auto my-3 rounded-circle ${currentMin>0.04?'bg-success text-white':'text-danger bg-white border border-danger'}`} style={{width: "fit-content"}}>
-        <i className={`bi bi-power fs-1`}></i>
+        <i className={`bi bi-power fs-1 `}></i>
         </span>
             <p className='my-0 text-center'>Device is {isOn>currentMin?'ON':'OFF'}</p>
 
