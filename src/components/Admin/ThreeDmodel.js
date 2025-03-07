@@ -1,10 +1,13 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { useGLTF, ContactShadows } from '@react-three/drei';
+import { Center } from '@react-three/drei';
 
 // Component to load and animate the twin electric motor model
-function ThreeDmodel({ isOn, temperature, vibration, scaleFactor, model}) {
-  const { scene } = useGLTF(`/models/${model||'scene'}.gltf`);
+function ThreeDmodel({ isOn, temperature, vibration, vibrationMax, scaleFactor, renderModel, tempMin, tempMax}) {
+  const tempLink = `/models/${renderModel}.gltf`
+  console.log("renderModel:",tempLink)
+  const { scene } = useGLTF(tempLink);
   const groupRef = useRef();
 
   React.useEffect(() => {
@@ -15,21 +18,22 @@ function ThreeDmodel({ isOn, temperature, vibration, scaleFactor, model}) {
       }
     });
   }, [scene]);
+
   
 
   // Determine drop shadow color based on temperature:
   // Red when above 60, blue when below 40, gray otherwise.
-  const shadowColor = temperature > 60 ? '#F75900' : temperature < 40 ? '#08AFDD' : 'gray'; //props for min and max temperature
+  const shadowColor = temperature > tempMax ? '#F75900' : temperature < tempMin ? '#08AFDD' : 'gray'; //props for min and max temperature
 
   // Calculate vibration magnitude if vibration > 2 (vibration starts when above 2)
-  const vibrationMagnitude = vibration > 2 ? (vibration - 2) * 0.01 : 0;
+  const vibrationMagnitude = vibration > vibrationMax ? (vibration - vibrationMax) * 0.01 : 0;
 
   useFrame((state, delta) => {
     if (groupRef.current) {
       // If the device is on (isOn > 0.05), rotate to indicate it's running
-      if (isOn > 0.05) { //props for current min value
-        groupRef.current.rotation.y += delta;
-      }
+      // if (isOn > 0.05) { //props for current min value
+      //   groupRef.current.style.filter = `drop-shadow(0 0 4px #08AFDD)`;
+      // }
       // Apply a shaking effect if vibration is above the threshold
       if (vibrationMagnitude) {
         groupRef.current.position.x = Math.sin(state.clock.elapsedTime * 50) * vibrationMagnitude;
@@ -45,7 +49,10 @@ function ThreeDmodel({ isOn, temperature, vibration, scaleFactor, model}) {
   return (
     <group ref={groupRef} scale={[scaleFactor, scaleFactor, scaleFactor]}>
       {/* Render the loaded 3D model */}
-      <primitive object={scene} dispose={null} />
+      <Center>
+        <primitive object={scene} dispose={null} />
+      </Center>
+
       {/* Render a drop shadow with a color based on temperature */}
       <ContactShadows 
         position={[0, -1.5, 0]} 
@@ -59,25 +66,24 @@ function ThreeDmodel({ isOn, temperature, vibration, scaleFactor, model}) {
 }
 
 // Main component that wraps the 3D scene in a Canvas
-export default function Test({ isOn, temperature, vibration }) {
+export default function Test({ isOn, temperature, vibration, renderModel, currentMin, vibrationMax, tempMin, tempMax }) {
 
-    const shadowColor = temperature > 60 ? '#F75900' : temperature < 40 ? '#08AFDD' : 'gray';
-
+    const shadowColor = temperature > tempMax ? '#F75900' : temperature < tempMin ? '#08AFDD' : 'gray';
 
   return (
     <div>
 
-        <span className={`d-flex justify-content-center align-items-center px-2 mx-auto my-3 rounded-circle ${isOn>0.04?'bg-text-white':'text-bg-white border border-danger'}`} style={{width: "fit-content"}}>
-        <i className={`bi bi-power fs-1 `}></i>
+        <span className={`d-flex justify-content-center align-items-center px-2 mx-auto my-3 rounded-circle ${currentMin>0.04?'bg-success text-white':'text-danger bg-white border border-danger'}`} style={{width: "fit-content"}}>
+        <i className={`bi bi-power fs-1`}></i>
         </span>
-            <p className='my-0 text-center'>Device is {isOn>0.04?'ON':'OFF'}</p>
+            <p className='my-0 text-center'>Device is {isOn>currentMin?'ON':'OFF'}</p>
 
         <Canvas 
             shadows 
-            camera={{ position: [0, 0 ,0.4], fov: 60 }}
-            style={{width: '100%', height: '300px',  filter: `drop-shadow(0 0 4px ${shadowColor})`, position : "relative" , bottom : "50px"}}
+            camera={{ position: [0, 0 ,0.6], fov: 60 }}
+            style={{width: '100%', height: '300px',  filter: `drop-shadow(0 0 4px ${shadowColor})`}}
             className='canva-css'
-            >
+        >
             {/* Basic ambient and directional lighting */}
             <ambientLight intensity={0.9} />
             <directionalLight
@@ -103,8 +109,12 @@ export default function Test({ isOn, temperature, vibration }) {
             <ThreeDmodel 
                 isOn={isOn} 
                 temperature={temperature} 
+                tempMin={tempMin} 
+                tempMax={tempMax}
                 vibration={vibration} 
-                scaleFactor={4} 
+                vibrationMax={vibrationMax} 
+                scaleFactor={4}
+                renderModel={renderModel} 
             />
             
             </Canvas>
@@ -117,4 +127,6 @@ export default function Test({ isOn, temperature, vibration }) {
 }
 
 // Preload the 3D model for better performance
-useGLTF.preload('/models/scene.gltf');
+// useGLTF.preload('/models/scene.gltf');
+useGLTF.preload('/models/bulb.gltf');
+useGLTF.preload('/models/motor.gltf');

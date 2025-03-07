@@ -18,6 +18,8 @@ export const Chartdevice = () => {
   const [lastProcessedId, setLastProcessedId] = useState(null);
   const [lastFeedTimestamp, setLastFeedTimestamp] = useState(null)
 
+  const [model, setModel] = useState(null)
+
   const [Ax, setAx] = useState(null);
   const [Ay, setAy] = useState(null);
   const [Az, setAz] = useState(null);
@@ -55,7 +57,7 @@ export const Chartdevice = () => {
       setCurrentPower(currentPower)
 
     }
-  },[frequency , temperature,current])
+  },[frequency , temperature, current])
 
 
 const controls = {
@@ -79,10 +81,10 @@ const controls = {
     const selectedDevice = Device?.find((item) => item.deviceId === chartid);
     if (selectedDevice) {
       setInform(selectedDevice);
+      setModel(((selectedDevice.deviceId).toLowerCase()==="dev-2025-001")?"bulb":"scene")
     }
   }, [chartid, Device]);
 
-  console.log("Device:",Infrom)
 
   useEffect(() => {
     if (!Infrom) return;
@@ -283,11 +285,10 @@ const controls = {
 
   }, [Infrom, lastProcessedId]); // Dependency updated to track latest processed ID
 
-  if (alerts === null || liveChartData === null || lastFeedTimestamp === null || !Ax || !Ay || !Az || !Gx || !Gy || !Gz || !voltage || !current || !power || !energy || !frequency || !powerfactor || !temperature || CurrentTemp === null || currentPower === null || currentVibration === null) {
+  if (alerts === null || liveChartData === null || lastFeedTimestamp === null || !Ax || !Ay || !Az || !Gx || !Gy || !Gz || !voltage || !current || !power || !energy || !frequency || !powerfactor || !temperature || CurrentTemp === null || currentPower === null || currentVibration === null || model===null || !Infrom) {
     return <Loading />
   }
 
-  
 
 
   return (
@@ -305,9 +306,9 @@ const controls = {
             <table className="table table-bordered table-rounded m-0">
               <thead>
                 <tr className="fw-bold">
-                  <th className="text-primary">Parameter</th>
-                  <th className="text-primary">Value</th>
-                  <th className="text-primary">Range</th>
+                  <th className="text-primary" style={{width: '33%'}}>Parameter</th>
+                  <th className="text-primary" style={{width: '33%'}}>Live record</th>
+                  <th className="text-primary" style={{width: '33%'}}>Range</th>
                 </tr>
               </thead>
               <tbody>
@@ -319,11 +320,12 @@ const controls = {
                   "frequency",
                   "powerfactor",
                   "tempeature"
-                ].map((param) => (
+                ].map((param, i) => (
                   <tr key={param}>
-                    <td className="fw-bold">{(param==="tempeature"?"Temperature":param.charAt(0).toUpperCase() + param.slice(1))}</td>
-                    <td>{Infrom[param]?.value || "N/A"}</td>
-                    <td>
+                    <td className="fw-bold" style={{width: '33%'}}>{(param==="tempeature"?"Temperature":param.charAt(0).toUpperCase() + param.slice(1))}</td>
+                    <td style={{width: '33%'}}>{liveChartData[i].data.splice(-1)[0] || "N/A"}</td>
+                    {/* <td>{Infrom[param]?.value || "N/A"}</td> */}
+                    <td style={{width: '33%'}}>
                       {Infrom[param]?.low || "N/A"} -{" "}
                       {Infrom[param]?.high || "N/A"}
                     </td>
@@ -368,14 +370,7 @@ const controls = {
 
     <div className="bg-light d-flex justify-content-center rounded">
 
-
-
-      <ThreeDmodel  isOn={0.06||currentPower} temperature={62||CurrentTemp} vibration={2.1||currentVibration} model={`${(Infrom.deviceId).toLowerCase()==="dev-2025-001"?"bulb":"scene"}`}/>
-
-     
-
-     
-      
+      <ThreeDmodel  isOn={currentPower||0.04} temperature={CurrentTemp||50} vibration={currentVibration||1.8} renderModel={model} currentMin={Infrom.current.low||0.05} vibrationMax={Infrom.frequency.high||2} tempMin={Infrom.tempeature.low||40} tempMax={Infrom.tempeature.high||60}/>
 
     </div>
 
@@ -388,7 +383,6 @@ const controls = {
             {
               [voltage, current, power, energy, frequency, powerfactor, temperature].map((chart, i) => (
                 <div className='col-11 col-md-5 col-lg-4 m-2 rounded bg-white' key={i}>
-                {console.log("chart:", chart)}
                 <Livechart data={[chart]} title={chart.seriesName} lineStyle={'smooth'} lineWidth={3} chartType={'line'} controls={controls} />
                 </div>
               ))
