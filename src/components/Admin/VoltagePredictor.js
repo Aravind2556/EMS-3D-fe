@@ -19,7 +19,7 @@ const VoltagePredictor = () => {
 
   // Fetch API Data from ThingSpeak
   useEffect(() => {
-    fetch("https://api.thingspeak.com/channels/2834537/feeds.json?api_key=KXM3US7B3WCO8JKS&results=500")
+    fetch("https://api.thingspeak.com/channels/2866252/feeds.json?api_key=HGKO9ARDWWYHKHLO")
       .then(response => response.json())
       .then(data => {
         if (data.feeds) {

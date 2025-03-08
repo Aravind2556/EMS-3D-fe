@@ -89,14 +89,14 @@ const controls = {
   useEffect(() => {
     if (!Infrom) return;
 
-    const channelId = "2834537";
-    const apiKey = "KXM3US7B3WCO8JKS";
+    const channelId = "2866252";
+    const apiKey = "HGKO9ARDWWYHKHLO";
     const thingspeakUrl = `https://api.thingspeak.com/channels/${channelId}/feeds.json?api_key=${apiKey}`;
 
     const fetchData = () => {
 
       // Code to fetch Ax,y,z and Gx,y,z data from Thinkspeak
-      fetch("https://api.thingspeak.com/channels/2849270/feeds.json?api_key=MUDJGGPTKPITA0BM")
+      fetch("https://api.thingspeak.com/channels/2866252/feeds.json?api_key=HGKO9ARDWWYHKHLO")
         .then(res => res.json())
         .then(data => {
           if (data && data.feeds && data.feeds.length > 0) {
