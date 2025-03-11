@@ -34,6 +34,7 @@ export const Chartdevice = () => {
   const [frequency, setFrequency] = useState(null);
   const [powerfactor, setPowerfactor] = useState(null);
   const [temperature, setTemperature] = useState(null);
+  const [vibration, setVibration] = useState(null);
 
   const [currentVibration,setCurrentFrequnce]=useState(null)
   const [CurrentTemp,setCurrentTemp]=useState(null)
@@ -41,8 +42,8 @@ export const Chartdevice = () => {
 
 
   React.useEffect(()=>{
-    if(frequency){
-      const currentFrequence = frequency["y-axis"].slice(-1)[0]
+    if(vibration){
+      const currentFrequence =  vibration["y-axis"].slice(-1)[0]
       setCurrentFrequnce(currentFrequence)
     }
 
@@ -57,7 +58,7 @@ export const Chartdevice = () => {
       setCurrentPower(currentPower)
 
     }
-  },[frequency , temperature, current])
+  },[vibration , temperature, current])
 
 
 const controls = {
@@ -178,7 +179,7 @@ const controls = {
               { key: "field5", name: "Frequency", color: "#1E90FF", type: "heatmap" },
               { key: "field6", name: "Power Factor", color: "#800080", type: "radar" },
               { key: "field7", name: "Temperature", color: "#FFA500", type: "line" },
-              // { key: "field8", name: "Vibrati/on", color: "#008080", type: "bar" },
+              { key: "field8", name: "Vibration", color: "#008080", type: "bar" },
             ];
             let newAlerts = [];
             const chartData = fields
@@ -269,6 +270,13 @@ const controls = {
               color: "#FFA500",
               seriesName: 'temperature'
             })
+            const vibrationRecords = feeds.map(data => data.field8)
+            setVibration({
+              "x-axis": xAxisData,
+              "y-axis": vibrationRecords,
+              color: "#FFA500",
+              seriesName: 'vibration'
+            })
 
 
 
@@ -289,6 +297,7 @@ const controls = {
     return <Loading />
   }
 
+  console.log("liveChartData:",liveChartData)
 
 
   return (
@@ -319,15 +328,16 @@ const controls = {
                   "energy",
                   "frequency",
                   "powerfactor",
-                  "tempeature"
+                  "tempeature",
+                  "vibration"
                 ].map((param, i) => (
                   <tr key={param}>
                     <td className="fw-bold" style={{width: '33%'}}>{(param==="tempeature"?"Temperature":param.charAt(0).toUpperCase() + param.slice(1))}</td>
-                    <td style={{width: '33%'}}>{liveChartData[i].data.splice(-1)[0] || "N/A"}</td>
+                    <td style={{width: '33%'}}>{liveChartData[i].data.slice(-1)[0] || 0}</td>
                     {/* <td>{Infrom[param]?.value || "N/A"}</td> */}
                     <td style={{width: '33%'}}>
-                      {Infrom[param]?.low || "N/A"} -{" "}
-                      {Infrom[param]?.high || "N/A"}
+                      {Infrom[param]?.low || 0} -{" "}
+                      {Infrom[param]?.high || 0}
                     </td>
                   </tr>
                 ))}
